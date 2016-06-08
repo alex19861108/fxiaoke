@@ -1,0 +1,16 @@
+#!/bin/sh
+
+mfile=$1
+while read line; do
+	echo -e "checking machine $line"
+	hostname=$(echo $line | cut -f 1)
+	username=$(echo $line | cut  -f 2)
+	passwd=$(echo $line | cut -f 3)
+	cmd=$(echo $line | cut -f 4)
+	ret=$(/usr/bin/expect -d -f user-valide.exp $hostname $passwd)
+	res=$(echo $ret | grep "is valide")
+	if [[ $res != 0 ]]; then
+		echo "$hostname $cmd is not valide"
+	fi
+	sleep 2
+done < $mfile

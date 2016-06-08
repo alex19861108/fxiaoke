@@ -1,0 +1,66 @@
+#!/usr/bin/expect
+set timeout 10
+set username liuw@firstshare.cn
+
+#puts $argc
+#puts $argv
+#set hostname [lindex $argv [expr $argc-1] ]
+set hostname [lindex $argv 0 ]
+set passwd [lindex $argv 1 ]
+#puts $hostname
+#puts $username
+
+#spawn ssh $username@$hostname
+#expect {
+#	"yes/no" {
+#		send "yes\n"
+#		exp_continue
+#	}
+#	"assword" {
+#		#send_user "what?\n"
+#		send "$passwd\n"
+#	}
+#	expect eof
+#}
+
+set logged_in false
+set fssvca037_valide false
+
+spawn ssh $username@$hostname
+expect {
+	"yes/no" {
+		send "yes\n"
+		exp_continue
+	}
+	"assword" {
+		send "$passwd\n"
+		exp_continue
+	}
+	"*firstshare.cn*" {
+		#send_user "logged in"
+		set logged_in true
+		send "sudo37\n"
+		expect "*fssvca037*" {
+			#send_user "sodu37 is valid"
+			send "exit\n"
+			sleep 1
+			expect "*firstshare.cn*" {
+				set fssvca037_valide true
+				send "exit\n"
+				sleep 1
+			}
+		}
+		send "exit\n"
+		exp_continue
+	}
+	timeout {
+		send_user "timeout...."
+	}
+	eof {
+		if { "$fssvca037_valide" == "true" } {
+			send_user "$hostname is valide\n"
+		} else {
+			send_user "$hostname is not valide\n"
+		}
+	}
+}
